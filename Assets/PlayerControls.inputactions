@@ -91,7 +91,7 @@
                 {
                     "name": "Right Stick",
                     "id": "7058ad37-fcbb-4d03-8e64-982c40c16b9f",
-                    "path": "2DVector(mode=1)",
+                    "path": "2DVector(mode=2)",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -155,7 +155,34 @@
                     "id": "a5fac439-6789-4e33-b9e3-24254bf1d9d5",
                     "expectedControlType": "Button",
                     "processors": "",
+                    "interactions": "Tap(duration=0.4)",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Jump",
+                    "type": "Button",
+                    "id": "5c748453-ae6b-4bff-b667-ee23c1c7329e",
+                    "expectedControlType": "Button",
+                    "processors": "",
                     "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RB",
+                    "type": "Button",
+                    "id": "d5b10104-a234-46fb-b583-b08510b83a54",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Sprint",
+                    "type": "PassThrough",
+                    "id": "30f98d28-c3c8-4ac7-a892-f76d6be67321",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold",
                     "initialStateCheck": false
                 }
             ],
@@ -163,11 +190,72 @@
                 {
                     "name": "",
                     "id": "fd93d464-b8ff-4fd4-a2b6-e8737ac2d539",
-                    "path": "<Gamepad>/leftTrigger",
+                    "path": "<Gamepad>/leftStickPress",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Dodge",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "abf37f13-47e5-4ac1-95a0-cb2f74069115",
+                    "path": "<Gamepad>/leftStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Sprint",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6597f67f-6880-49e4-89c1-1d2ee90589e3",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0990be64-0041-4b36-b20d-bff90df270ac",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RB",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "UI",
+            "id": "8c0c8d19-dcba-4fd2-aa98-418931bc4936",
+            "actions": [
+                {
+                    "name": "X",
+                    "type": "Button",
+                    "id": "4328a456-f583-4981-9b42-a6cca05acb7c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Tap(duration=0.4)",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "96cf63e5-ee08-459d-9d07-ea2aa2204bab",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "X",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -8,19 +8,30 @@ namespace MSA
     public class PlayerLocomotionManager : CharacterLocomotionManager
     {
         PlayerManager player;
-        public float verticalMovement;
-        public float horizontalMovement;
-        public float moveAmount;
+
+        [HideInInspector] public float verticalMovement;
+        [HideInInspector] public float horizontalMovement;
+        [HideInInspector] public float moveAmount;
 
         [Header("Movement Settings")]
         private Vector3 moveDirection;
         private Vector3 targetRotationDirection;
         [SerializeField] float walkingSpeed = 2;
-        [SerializeField] float runningSpeed = 6;
+        [SerializeField] float runningSpeed = 5;
+        [SerializeField] float sprintingSpeed = 6.5f;
         [SerializeField] float rotationSpeed = 15;
+
+
+        [Header("Jump")]
+        [SerializeField] float jumpStaminaCost = 8;
+        [SerializeField] float jumpHeight = 4;
+        [SerializeField] float jumpForwardSpeed = 5;
+        [SerializeField] float freeFallSpeed = 2;
+        private Vector3 jumpDirection;
 
         [Header("Dodge")]
         private Vector3 rollDirection;
+
 
         protected override void Awake()
         {
@@ -46,7 +57,7 @@ namespace MSA
                 moveAmount = player.characterNetworkManager.moveAmount.Value;
 
                 //  IF NOT LOCKED ON, PASS MOVE AMOUNT
-                player.playerAnimatorManager.UpdateAnimatorMovementParameters(0, moveAmount);
+                player.playerAnimatorManager.UpdateAnimatorMovementParameters(0, moveAmount, player.playerNetworkManager.isSprinting.Value);
 
                 //  IF LOCKED ON, PASS HORZ AND VERT
             }
@@ -58,6 +69,8 @@ namespace MSA
         {
             HandleGroundedMovement();
             HandleRotation();
+            HandleJumpingMovement();
+            HandleFreeFallMovement();
         }
 
         private void GetMovementValues()
@@ -76,17 +89,48 @@ namespace MSA
             moveDirection.Normalize();
             moveDirection.y = 0;
 
-            if (PlayerInputManager.instance.moveAmount > 0.5f ) 
+            if (player.playerNetworkManager.isSprinting.Value)
             {
-                player.characterController.Move( moveDirection * runningSpeed *Time.deltaTime);
+                player.characterController.Move(moveDirection * sprintingSpeed * Time.deltaTime);
             }
-            else if (PlayerInputManager.instance.moveAmount >= 0.5f )
+            else
             {
-                player.characterController.Move(moveDirection * walkingSpeed * Time.deltaTime);
+                if (PlayerInputManager.instance.moveAmount > 0.5f)
+                {
+                    player.characterController.Move(moveDirection * runningSpeed * Time.deltaTime);
+                }
+                else if (PlayerInputManager.instance.moveAmount >= 0.5f)
+                {
+                    player.characterController.Move(moveDirection * walkingSpeed * Time.deltaTime);
+                }
             }
+           
 
             
         }
+
+        private void HandleJumpingMovement()
+        {
+            if (player.playerNetworkManager.isJumping.Value)
+            {
+                player.characterController.Move(jumpDirection * jumpForwardSpeed * Time.deltaTime);
+            }
+        }
+        private void HandleFreeFallMovement()
+        {
+            if (!player.isGrounded)
+            {
+                Vector3 freeFallDirection;
+
+                freeFallDirection = PlayerCamera.instance.transform.forward * PlayerInputManager.instance.verticalInput;
+                freeFallDirection = freeFallDirection + PlayerCamera.instance.transform.right * PlayerInputManager.instance.horizontalInput;
+                freeFallDirection.y = 0;
+
+                player.characterController.Move(freeFallDirection * freeFallSpeed * Time.deltaTime);
+            }
+        }
+
+
 
         private void HandleRotation()
         {
@@ -106,6 +150,23 @@ namespace MSA
             Quaternion newRotation = Quaternion.LookRotation(targetRotationDirection);
             Quaternion targetRotation = Quaternion.Slerp(transform.rotation, newRotation, rotationSpeed * Time.deltaTime);
             transform.rotation = targetRotation;
+        }
+
+        public void HandleSprinting()
+        {
+            if(player.isPerformingAction)
+            {
+                player.playerNetworkManager.isSprinting.Value = false;
+            }
+
+            if (moveAmount >= 0.5)
+            {
+                player.playerNetworkManager.isSprinting.Value = true;
+            }
+            else
+            {
+                player.playerNetworkManager.isSprinting.Value = false;
+            }
         }
 
         public void AttemptToPerformDodge()
@@ -131,6 +192,60 @@ namespace MSA
             {
                 player.playerAnimatorManager.PlayTargetActionAnimation("Back_Step_01", true, true);
             }
+        }
+
+        public void AttemptToPerformJump()
+        {
+            //  IF WE ARE PERFORMING A GENERAL ACTION, WE DO NOT WANT TO ALLOW A JUMP (WILL CHANGE WHEN COMBAT IS ADDED)
+            if (player.isPerformingAction)
+                return;
+
+            //  IF WE ARE OUT OF STAMINA, WE DO NOT WISH TO ALLOW A JUMP
+            if (player.playerNetworkManager.currentStamina.Value <= 0)
+                return;
+
+            //  IF WE ARE ALREADY IN A JUMP, WE DO NOT WANT TO ALLOW A JUMP AGAIN UNTIL THE CURRENT JUMP HAS FINISHED
+            if (player.playerNetworkManager.isJumping.Value)
+                return;
+
+            //  IF WE ARE NOT GROUNDED, WE DO NOT WANT TO ALLOW A JUMP
+            if (!player.isGrounded)
+                return;
+
+            //  IF WE ARE TWO HANDING OUR WEAPON, PLAY THE TWO HANDED JUMP ANIMATION, OTHERWISE PLAY THE ONE HANDED ANIMATION ( TO DO )
+            player.playerAnimatorManager.PlayTargetActionAnimation("Main_Jump_Start", false);
+
+            player.playerNetworkManager.isJumping.Value = true;
+
+            player.playerNetworkManager.currentStamina.Value -= jumpStaminaCost;
+
+            jumpDirection = PlayerCamera.instance.cameraObject.transform.forward * PlayerInputManager.instance.verticalInput;
+            jumpDirection += PlayerCamera.instance.cameraObject.transform.right * PlayerInputManager.instance.horizontalInput;
+            jumpDirection.y = 0;
+
+            if (jumpDirection != Vector3.zero)
+            {
+                //  IF WE ARE SPRINTING, JUMP DIRECTION IS AT FULL DISTANCE
+                if (player.playerNetworkManager.isSprinting.Value)
+                {
+                    jumpDirection *= 1;
+                }
+                //  IF WE ARE RUNNING, JUMP DIRECTION IS AT HALF DISTANCE
+                else if (PlayerInputManager.instance.moveAmount > 0.5)
+                {
+                    jumpDirection *= 0.5f;
+                }
+                //  IF WE ARE WALKING, JUMP DIRECTION IS AT QUARTER DISTANCE
+                else if (PlayerInputManager.instance.moveAmount <= 0.5)
+                {
+                    jumpDirection *= 0.25f;
+                }
+            }
+        }
+
+        public void ApplyJumpingVelocity()
+        {
+            yVelocity.y = Mathf.Sqrt(jumpHeight * -2 * gravityForce);
         }
 
     }

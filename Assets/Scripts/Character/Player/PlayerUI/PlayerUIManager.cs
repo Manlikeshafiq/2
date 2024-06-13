@@ -12,6 +12,9 @@ namespace MSA
         [Header("NETWORK JOIN")]
         [SerializeField] bool startGameAsClient;
 
+        [HideInInspector] public PlayerUIHudManager playerUIHudManager;
+        [HideInInspector] public PlayerUIPopUpManager playerUIPopUpManager;
+
         private void Awake()
         {
             if (instance == null)
@@ -22,6 +25,9 @@ namespace MSA
             {
                 Destroy(gameObject);
             }
+
+            playerUIHudManager = GetComponentInChildren<PlayerUIHudManager>();
+            playerUIPopUpManager = GetComponentInChildren<PlayerUIPopUpManager>();
         }
 
         private void Start()
