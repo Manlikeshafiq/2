@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ea15e7a7503b3d4cbcb506bbb6707d6, type: 3}
+  m_Name: Combat State
+  m_EditorClassIdentifier: 
+  aiCharacterAttacks:
+  - {fileID: 11400000, guid: f55f4d90890ce154fa39598929e29144, type: 2}
+  - {fileID: 11400000, guid: eab1fc817a22e324c8dae73d99a90f84, type: 2}
+  potentialAttacks:
+  - {fileID: 11400000, guid: f55f4d90890ce154fa39598929e29144, type: 2}
+  - {fileID: 11400000, guid: eab1fc817a22e324c8dae73d99a90f84, type: 2}
+  choosenAttack: {fileID: 11400000, guid: eab1fc817a22e324c8dae73d99a90f84, type: 2}
+  previousAttack: {fileID: 11400000, guid: eab1fc817a22e324c8dae73d99a90f84, type: 2}
+  canPerformCombo: 0
+  chanceToPerformCombo: 25
+  maximumEngagementDistance: 5

@@ -17,14 +17,15 @@ namespace MSA
         [HideInInspector] public CharacterNetworkManager characterNetworkManager;
         [HideInInspector] public CharacterEffectsManager characterEffectsManager;
         [HideInInspector] public CharacterAnimatorManager characterAnimatorManager;
+        [HideInInspector] public CharacterCombatManeger characterCombatManager;
+        [HideInInspector] public CharacterSoundFXManager characterSoundFXManager;
+        [HideInInspector] public CharacterLocomotionManager characterLocomotionManager;
+
+        [Header("Character Group")]
+        public CharacterGroup characterGroup;
 
         [Header("Flags")]
         public bool isPerformingAction = false;
-        public bool isJumping = false;
-        public bool isGrounded = true;
-        public bool applyRootMotion = false;
-        public bool canRotate = true;
-        public bool canMove = true;
 
         protected virtual void Awake()
         {
@@ -36,6 +37,9 @@ namespace MSA
             characterNetworkManager = GetComponent<CharacterNetworkManager>();
             characterEffectsManager = GetComponent<CharacterEffectsManager>();
             characterAnimatorManager = GetComponent<CharacterAnimatorManager>();
+            characterCombatManager = GetComponent<CharacterCombatManeger>();
+            characterSoundFXManager = GetComponent<CharacterSoundFXManager>();
+            characterLocomotionManager = GetComponent<CharacterLocomotionManager>();
         }
 
         protected virtual void Start()
@@ -45,7 +49,7 @@ namespace MSA
 
         protected virtual void Update()
         {
-            animator.SetBool("isGrounded", isGrounded);
+            animator.SetBool("isGrounded", characterLocomotionManager.isGrounded);
 
             //  IF THIS CHARACTER IS BEING CONTROLLED FROM OUR SIDE, THEN ASSIGN ITS NETWORK POSITION TO THE POSITION OF OUR TRANSFORM
             if (IsOwner)
@@ -70,9 +74,29 @@ namespace MSA
             }
         }
 
+        protected virtual void FixedUpdate()
+        {
+
+        }
+
         protected virtual void LateUpdate()
         {
 
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+
+            animator.SetBool("isMoving", characterNetworkManager.isMoving.Value);
+            characterNetworkManager.isMoving.OnValueChanged += characterNetworkManager.OnIsMovingChanged;
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+
+            characterNetworkManager.isMoving.OnValueChanged -= characterNetworkManager.OnIsMovingChanged;
         }
 
         public virtual IEnumerator ProcessDeathEvent(bool manuallySelectDeathAnimation = false)

@@ -13,12 +13,37 @@ public enum CharacterSlot
     CharacterSlot_02,
     CharacterSlot_03,
     CharacterSlot_04,
-    NO_SLOT,
-  
+    CharacterSlot_05,
+    CharacterSlot_06,
+    CharacterSlot_07,
+    CharacterSlot_08,
+    CharacterSlot_09,
+    CharacterSlot_10,
+    NO_SLOT
+}
+
+public enum CharacterGroup
+{
+    Team01,
+    Team02
 }
 
 public enum WeaponModelSlot
 {
     RightHand,
     LeftHand,
+    //Right Hips
+    //Left Hips
+    //Back
+}
+
+//  THIS IS USED TO CALCULATE DAMAGE BASED ON ATTACK TYPE
+public enum AttackType
+{
+    LightAttack01,
+    LightAttack02,
+    HeavyAttack01,
+    HeavyAttack02,
+    ChargedAttack01,
+    ChargedAttack02
 }

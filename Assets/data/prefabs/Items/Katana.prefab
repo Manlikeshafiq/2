@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aec30f5a9ef6f6240af53e0f3c54535a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  meleeDamageCollider: {fileID: 0}
+  meleeDamageCollider: {fileID: 4450842682814857637}
 --- !u!1 &2063771624347102642
 GameObject:
   m_ObjectHideFlags: 0
@@ -63,7 +63,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2821119875859720625
 Transform:
   m_ObjectHideFlags: 0
@@ -73,8 +73,8 @@ Transform:
   m_GameObject: {fileID: 2063771624347102642}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: -0.045, z: 0}
+  m_LocalScale: {x: 2.25, y: 1.2428124, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3729516276048441487}
@@ -96,10 +96,10 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
-  m_Size: {x: 0.15712687, y: 0.2414975, z: 1.8358058}
-  m_Center: {x: 0.009822603, y: 0.16402252, z: 0.43280482}
+  m_Size: {x: 0.15712687, y: 0.26095572, z: 2.0707288}
+  m_Center: {x: 0.009822602, y: 0.17375174, z: 0.36025584}
 --- !u!114 &4450842682814857637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -112,12 +112,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94384c07bb223cf4b9a7b3b2e9934206, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  damageCollider: {fileID: 5263085742263116672}
   physicalDamage: 0
   magicDamage: 0
   fireDamage: 0
   lightningDamage: 0
   holyDamage: 0
   characterCausingDamage: {fileID: 0}
+  light_Attack_01_Modifier: 0
+  light_Attack_02_Modifier: 0
+  heavy_Attack_01_Modifier: 0
+  heavy_Attack_02_Modifier: 0
+  charge_Attack_01_Modifier: 0
+  charge_Attack_02_Modifier: 0
 --- !u!1 &2609354596169498884
 GameObject:
   m_ObjectHideFlags: 0

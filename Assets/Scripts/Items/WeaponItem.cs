@@ -1,3 +1,4 @@
+using MSA;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,24 +31,28 @@ namespace MSA
         public float poiseDamage = 10;
         //  OFFENSIVE  POISE BONUS WHEN ATTACKING
 
-        //  WEAPON MODIFIERS
-        //  LIGHT ATTACK MODIFIER
-        //  HEAVY ATTACK MODIFIER
-        //  CRITICAL DAMAGE MODIFIER ECT
+        [Header("Attack Modifiers")]
+        public float light_Attack_01_Modifier = 1.0f;
+        public float light_Attack_02_Modifier = 1.2f;
+        public float heavy_Attack_01_Modifier = 1.4f;
+        public float heavy_Attack_02_Modifier = 1.6f;
+        public float charge_Attack_01_Modifier = 2.0f;
+        public float charge_Attack_02_Modifier = 2.2f;
 
-        [Header("Stamina Costs")]
-        public int baseStaminaCost = 0;
+        [Header("Stamina Cost Modifiers")]
+        public int baseStaminaCost = 20;
+        public float lightAttackStaminaCostMultiplier = 0.9f;
         //  RUNNING ATTACK STAMINA COST MODIFIER
-        //  LIGHT ATTACK STAMINA COST MODIFIER
         //  HEAVY ATTACK STAMINA COST MODIFIER ECT
 
 
         [Header("Actions")]
         public WeaponItemAction oh_RB_Action;   // ONE HAND RIGHT BUMPER ACTION
-
+        public WeaponItemAction oh_RT_Action;   // ONE HAND RIGHT TRIGGER ACTION
         //  ASH OF WAR
 
         //  BLOCKING SOUNDS
-
+        [Header("Whooshes")]
+        public AudioClip[] whooshes;
     }
 }

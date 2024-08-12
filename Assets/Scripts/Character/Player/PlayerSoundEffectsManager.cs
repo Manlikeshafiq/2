@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MSA
 {
-    public class PlayerSoundEffectsManager : CharacterSoundEffectManager
+    public class PlayerSoundEffectsManager : CharacterSoundFXManager
     {
 
     }

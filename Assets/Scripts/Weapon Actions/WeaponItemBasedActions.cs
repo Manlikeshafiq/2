@@ -16,8 +16,6 @@ namespace MSA
             {
                 playerPerformingAction.playerNetworkManager.currentWeaponBeingUsed.Value = weaponPerformingAction.itemID;
             }
-
-            Debug.Log("THE ACTION HAS FIRED");
         }
     }
 }

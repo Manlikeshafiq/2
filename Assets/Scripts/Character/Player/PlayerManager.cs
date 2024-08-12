@@ -2,15 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Netcode;
+using MSA;
+using System.Globalization;
+using System;
 
 namespace MSA
 {
     public class PlayerManager : CharacterManager
     {
-        [Header("DEBUG MENU")]
-        [SerializeField] bool respawnCharacter = false;
-        [SerializeField] bool switchRightWeapon = false;
-
         [HideInInspector] public PlayerAnimatorManager playerAnimatorManager;
         [HideInInspector] public PlayerLocomotionManager playerLocomotionManager;
         [HideInInspector] public PlayerNetworkManager playerNetworkManager;
@@ -47,8 +47,6 @@ namespace MSA
 
             //  REGEN STAMINA
             playerStatsManager.RegenerateStamina();
-
-            DebugMenu();
         }
 
         protected override void LateUpdate()
@@ -64,6 +62,8 @@ namespace MSA
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
+
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnectedCallback;
 
             //  IF THIS IS THE PLAYER OBJECT OWNED BY THIS CLIENT
             if (IsOwner)
@@ -85,16 +85,76 @@ namespace MSA
             //  STATS
             playerNetworkManager.currentHealth.OnValueChanged += playerNetworkManager.CheckHP;
 
+            //  LOCK ON
+            playerNetworkManager.isLockedOn.OnValueChanged += playerNetworkManager.OnIsLockedOnChanged;
+            playerNetworkManager.currentTargetNetworkObjectID.OnValueChanged += playerNetworkManager.OnLockOnTargetIDChange;
+
             //  EQUIPMENT
             playerNetworkManager.currentRightHandWeaponID.OnValueChanged += playerNetworkManager.OnCurrentRightHandWeaponIDChange;
             playerNetworkManager.currentLeftHandWeaponID.OnValueChanged += playerNetworkManager.OnCurrentLeftHandWeaponIDChange;
             playerNetworkManager.currentWeaponBeingUsed.OnValueChanged += playerNetworkManager.OnCurrentWeaponBeingUsedIDChange;
+
+            //  FLAGS
+            playerNetworkManager.isChargingAttack.OnValueChanged += playerNetworkManager.OnIsChargingAttackChanged;
 
             //  UPON CONNECTING, IF WE ARE THE OWNER OF THIS CHARACTER, BUT WE ARE NOT THE SERVER, RELOAD OUR CHARACTER DATA TO THIS NEWLY INSTANTIATED CHARACTER
             //  WE DONT RUN THIS IF WE ARE THE SERVER, BECAUSE SINCE THEY ARE THE HOST, THEY ARE ALREADY LOADED IN AND DON'T NEED TO RELOAD THEIR DATA
             if (IsOwner && !IsServer)
             {
                 LoadGameDataFromCurrentCharacterData(ref WorldSaveGameManager.instance.currentCharacterData);
+            }
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnectedCallback;
+
+            //  IF THIS IS THE PLAYER OBJECT OWNED BY THIS CLIENT
+            if (IsOwner)
+            {
+                //  UPDATE THE TOTAL AMOUNT OF HEALTH OR STAMINA WHEN THE STAT LINKED TO EITHER CHANGES
+                playerNetworkManager.vitality.OnValueChanged -= playerNetworkManager.SetNewMaxHealthValue;
+                playerNetworkManager.endurance.OnValueChanged -= playerNetworkManager.SetNewMaxStaminaValue;
+
+                //  UPDATES UI STAT BARS WHEN A STAT CHANGES (HEALTH OR STAMINA)
+                playerNetworkManager.currentHealth.OnValueChanged -= PlayerUIManager.instance.playerUIHudManager.SetNewHealthValue;
+                playerNetworkManager.currentStamina.OnValueChanged -= PlayerUIManager.instance.playerUIHudManager.SetNewStaminaValue;
+                playerNetworkManager.currentStamina.OnValueChanged -= playerStatsManager.ResetStaminaRegenTimer;
+            }
+
+            //  STATS
+            playerNetworkManager.currentHealth.OnValueChanged -= playerNetworkManager.CheckHP;
+
+            //  LOCK ON
+            playerNetworkManager.isLockedOn.OnValueChanged -= playerNetworkManager.OnIsLockedOnChanged;
+            playerNetworkManager.currentTargetNetworkObjectID.OnValueChanged -= playerNetworkManager.OnLockOnTargetIDChange;
+
+            //  EQUIPMENT
+            playerNetworkManager.currentRightHandWeaponID.OnValueChanged -= playerNetworkManager.OnCurrentRightHandWeaponIDChange;
+            playerNetworkManager.currentLeftHandWeaponID.OnValueChanged -= playerNetworkManager.OnCurrentLeftHandWeaponIDChange;
+            playerNetworkManager.currentWeaponBeingUsed.OnValueChanged -= playerNetworkManager.OnCurrentWeaponBeingUsedIDChange;
+
+            //  FLAGS
+            playerNetworkManager.isChargingAttack.OnValueChanged -= playerNetworkManager.OnIsChargingAttackChanged;
+        }
+
+        private void OnClientConnectedCallback(ulong clientID)
+        {
+            WorldGameSessionManager.instance.AddPlayerToActivePlayersList(this);
+
+            //  IF WE ARE THE SERVER, WE ARE THE HOST, SO WE DONT NEED TO LOAD PLAYERS TO SYNC THEM
+            //  YOU ONLY NEED TO LOAD OTHER PLAYERS GEAR TO SYNC IT IF YOU JOIN A GAME THATS ALREADY BEEN ACTIVE WITHOUT YOU BEING PRESENT
+            if (!IsServer && IsOwner)
+            {
+                foreach (var player in WorldGameSessionManager.instance.players)
+                {
+                    if (player != this)
+                    {
+                        player.LoadOtherPlayerCharacterWhenJoiningServer();
+                    }
+                }
             }
         }
 
@@ -116,6 +176,7 @@ namespace MSA
 
             if (IsOwner)
             {
+                isDead.Value = false;
                 playerNetworkManager.currentHealth.Value = playerNetworkManager.maxHealth.Value;
                 playerNetworkManager.currentStamina.Value = playerNetworkManager.maxStamina.Value;
                 //  RESTORE FOCUS POINTS
@@ -158,19 +219,18 @@ namespace MSA
             PlayerUIManager.instance.playerUIHudManager.SetMaxStaminaValue(playerNetworkManager.maxStamina.Value);
         }
 
-        //  DEBUG DELETE LATER
-        private void DebugMenu()
+        public void LoadOtherPlayerCharacterWhenJoiningServer()
         {
-            if (respawnCharacter)
-            {
-                respawnCharacter = false;
-                ReviveCharacter();
-            }
+            //  SYNC WEAPONS
+            playerNetworkManager.OnCurrentRightHandWeaponIDChange(0, playerNetworkManager.currentRightHandWeaponID.Value);
+            playerNetworkManager.OnCurrentLeftHandWeaponIDChange(0, playerNetworkManager.currentLeftHandWeaponID.Value);
 
-            if (switchRightWeapon)
+            //  ARMOR
+
+            //  LOCK ON
+            if (playerNetworkManager.isLockedOn.Value)
             {
-                switchRightWeapon = false;
-                playerEquipmentManager.SwitchRightWeapon();
+                playerNetworkManager.OnLockOnTargetIDChange(0, playerNetworkManager.currentTargetNetworkObjectID.Value);
             }
         }
     }
